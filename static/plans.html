@@ -1,0 +1,187 @@
+{{ define "PlansPage" }}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="/fontawesome-free-6.2.1-web/css/fontawesome.css" rel="stylesheet">
+    <link href="/fontawesome-free-6.2.1-web/css/brands.css" rel="stylesheet">
+    <link href="/fontawesome-free-6.2.1-web/css/solid.css" rel="stylesheet">
+    <link href="/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="/style.css">
+
+    <title>My Plans</title>
+</head>
+<body>
+    <nav id="nav">
+        <div id="navbar">
+            <input type="checkbox" id="toggle">
+            <i class="fa-solid fa-bars"></i>
+
+            <ul id="menu">
+                <li> <a href="/home/" class="navbar-btn"> Home </a> </li>
+                <li> <a href="/logout" class="navbar-btn"> Log out </a> </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="sticky-separator"></div>
+
+
+    <header>
+        <h2> My Plans </h2>
+        <input type="text" id="plan-input" placeholder="Do ...">
+        <span onclick="AddPlan()" class="button-add">Add</span>
+
+        <div>
+            <input type="date" id="plan-date">
+        </div>
+    </header>
+
+    <ul id="plans">
+        
+        
+        {{ range $val := .Plans }}
+        <li data-planid="{{ $val.Id }}">
+            <span> {{ $val.Plan }} </span>
+        </li>
+        {{ end }}
+
+    </ul>
+
+    
+    <footer>
+        <div class="fab fab-bottom-left-1 fab-red fab-ctx disabled fab-delete">
+            <i class="fa-solid fa-xmark"></i>
+        </div>
+        <div class="fab fab-bottom-left-2 fab-green fab-ctx disabled fab-mark-done">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        
+        <div class="fab fab-bottom-left-3 fab-blue fab-ctx disabled fab-edit">
+            <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+
+
+        <div class="fab fab-bottom-right">
+            <i class="fa-solid fa-floppy-disk"></i>
+        </div>
+    </footer>
+
+
+    <script>
+        function AddPlan() {
+            const text_el = document.getElementById('plan-input')
+            const date_el = document.getElementById('plan-date')
+
+            if (text_el.value === "") {
+                alert('You must enter a note')
+                return
+            }
+
+            let date = new Date(date_el.value)
+            let unix = (+date/1000).toFixed(0)
+            if(unix !== "NaN"){
+                
+                let query = `/newplan?text=${text_el.value}&expire=${unix}`
+                fetch(query, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                })
+                .then(response => response.text())
+                .then(text => { console.log(text); location.reload() })
+            }
+        }
+    </script>
+    <script>
+        var ul = document.querySelector("#plans")
+        let selectedIndex = -1
+        
+        const fab_edit = document.querySelector(".fab-edit")
+        const fab_done = document.querySelector(".fab-mark-done")
+        const fab_delete = document.querySelector(".fab-delete")
+
+        fab_edit.addEventListener('click', function(e) {
+            if (selectedIndex === -1) { return }
+
+            
+            let li = ul.children[selectedIndex]
+            let id = li.dataset.planid
+            
+            let newText = prompt("Enter new text", li.children[0].textContent)
+            if (newText === "" || newText == undefined || newText == null) { return }
+
+            let query = `/renameplan?id=${id}&newtext=${newText}`
+            fetch(query, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                },
+            })
+            .then(response => response.text())
+            .then(text => { console.log(text); location.reload() })
+        })
+
+        fab_done.addEventListener('click', function(e) {
+            alert('mark as done ' + selectedIndex)
+        })
+
+        fab_delete.addEventListener('click', function(e) {
+            if (selectedIndex === -1) { return }
+
+            
+            let li = ul.children[selectedIndex]
+            let id = li.dataset.planid
+
+            let query = `/deleteplan?id=${id}`
+            if(confirm("Are you sure you want to delete this plan?")) {
+                fetch(query, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                })
+                .then(response => response.text())
+                .then(text => { console.log(text); location.reload() })
+            }
+        })
+
+        ul.addEventListener('click', function(e) {
+            if (e.target.tagName === 'LI') {
+                for (t of Array.from(e.target.parentElement.children)) {
+                    t.classList.remove('done')
+                }
+                e.target.classList.add('done')
+
+
+                let index = Array.from(e.target.parentElement.children).indexOf(e.target)
+                let fabs = document.getElementsByClassName("fab-ctx")
+
+                if (index === selectedIndex) { // toggled
+                    for (fab of fabs) {
+                        fab.classList.add("disabled")
+                    }
+                    selectedIndex = -1
+                    e.target.classList.remove('done')
+                } else {
+                    for (fab of fabs) {
+                        fab.classList.remove("disabled")
+                    }
+                    selectedIndex = index
+                }
+                
+                
+
+                
+            }
+        }, false)
+    </script>
+</body>
+</html>
+{{ end }}
