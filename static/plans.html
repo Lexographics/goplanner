@@ -39,7 +39,7 @@
         <span onclick="AddPlan()" class="button-add">Add</span>
 
         <div>
-            <input type="date" id="plan-date">
+            <input type="datetime-local" id="plan-date">
         </div>
     </header>
 
@@ -165,6 +165,7 @@
             }
 
             let date = new Date(date_el.value)
+            date = new Date(date - (date.getTimezoneOffset() * 60 * 1000))
             let unix = (+date/1000).toFixed(0)
             if(unix !== "NaN"){
                 

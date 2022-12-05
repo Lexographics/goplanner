@@ -47,14 +47,14 @@ func HomeView(c echo.Context) error {
 		
 
 		if start == "" && end == "" {
-			res = db.Database.Find(&plans, "user_id = ?", id)
+			res = db.Database.Order("end asc").Find(&plans, "user_id = ?", id)
 		} else {
 			if start != "" && end == "" { // has start
-				res = db.Database.Find(&plans, "user_id = ? AND end > ?", id, startDate)
+				res = db.Database.Order("end asc").Find(&plans, "user_id = ? AND end >= ?", id, startDate)
 			} else if start == "" && end != "" { // has end
-				res = db.Database.Find(&plans, "user_id = ? AND end < ?", id, endDate)
+				res = db.Database.Order("end asc").Find(&plans, "user_id = ? AND end <= ?", id, endDate)
 			} else { // has both
-				res = db.Database.Find(&plans, "user_id = ? AND end > ? AND end < ?", id, startDate, endDate)
+				res = db.Database.Order("end asc").Find(&plans, "user_id = ? AND end >= ? AND end <= ?", id, startDate, endDate)
 			}
 		}
 
