@@ -231,6 +231,34 @@ header:after {
     user-select: none;
 }
 
+#plans li.done::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f00c"; /* <i class="fa-solid fa-check"></i> */ 
+    display: inline-block;
+    padding-right: 3px;
+    vertical-align: middle;
+    font-weight: 900;
+}
+
+#plans li.cancel::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f05e"; /* <i class="fa-solid fa-ban"></i> */
+    display: inline-block;
+    padding-right: 3px;
+    vertical-align: middle;
+    font-weight: 900;
+}
+
+#plans li.inprogress::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f110"; /* <i class="fa-solid fa-spinner"></i> */
+    display: inline-block;
+    padding-right: 3px;
+    vertical-align: middle;
+    font-weight: 900;
+}
+
+
 #plans li span:first-child {
     pointer-events: none;
 }
@@ -243,10 +271,10 @@ header:after {
     background-color: #afafaf;
 }
 
-#plans li.done {
+#plans li.selected {
     background-color: #1fa11f;
 }
-#plans li.done:nth-child(odd) {
+#plans li.selected:nth-child(odd) {
     background-color: #028a02;
 }
 

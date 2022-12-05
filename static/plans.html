@@ -46,7 +46,7 @@
         
         
         {{ range $val := .Plans }}
-        <li data-planid="{{ $val.Id }}">
+        <li class="{{ $val.State }}" data-planid="{{ $val.Id }}">
             <span> {{ $val.Plan }} </span>
         </li>
         {{ end }}
@@ -114,6 +114,8 @@
                 })
                 .then(response => response.text())
                 .then(text => { console.log(text); location.reload() })
+            } else {
+                alert('You must select a due date')
             }
         }
     </script>
@@ -211,9 +213,9 @@
         ul.addEventListener('click', function(e) {
             if (e.target.tagName === 'LI') {
                 for (t of Array.from(e.target.parentElement.children)) {
-                    t.classList.remove('done')
+                    t.classList.remove('selected')
                 }
-                e.target.classList.add('done')
+                e.target.classList.add('selected')
 
 
                 let index = Array.from(e.target.parentElement.children).indexOf(e.target)
@@ -229,7 +231,7 @@
                         fab.classList.add("state-disabled")
                     }
                     selectedIndex = -1
-                    e.target.classList.remove('done')
+                    e.target.classList.remove('selected')
                 } else {
                     for (fab of fabs) {
                         fab.classList.remove("disabled")
