@@ -1,15 +1,8 @@
 package goplanner
 
 import (
-	_ "database/sql"
-	"fmt"
 	"net/http"
 	"strconv"
-	_ "time"
-
-	_ "github.com/go-sql-driver/mysql"
-
-	_ "github.com/golang-jwt/jwt/v4"
 
 	"github.com/labstack/echo/v4"
 
@@ -27,7 +20,6 @@ func RenamePlanRequest(c echo.Context) error {
 
 	cookie, err := c.Cookie("sessionId")
 	if err != nil {
-		fmt.Printf("RenamePlanRequest error 1: %s\n", err)
 		return c.JSON(http.StatusUnauthorized, State{
 			Status: "Error",
 		})
@@ -36,7 +28,6 @@ func RenamePlanRequest(c echo.Context) error {
 
 	id, success, err := db.ValidateSession(cookie.Value)
 	if err != nil {
-		fmt.Printf("RenamePlanRequest Error 2\n")
 		return c.JSON(http.StatusUnauthorized, State{
 			Status: "Unauthorized",
 		})
@@ -45,7 +36,6 @@ func RenamePlanRequest(c echo.Context) error {
 	if success {
 		planidInt, err := strconv.Atoi(planid)
 		if err != nil {
-			fmt.Printf("RenamePlanRequest Error 3\n")
 			return c.JSON(http.StatusUnauthorized, State{
 				Status: "Unauthorized",
 			})
@@ -57,7 +47,6 @@ func RenamePlanRequest(c echo.Context) error {
 		}
 		res := db.Database.Model(&plan).Update("plan", newText)
 		if res.Error != nil {
-			fmt.Printf("RenamePlanRequest Error 4: %s\n", res.Error)
 			return c.JSON(http.StatusUnauthorized, State{
 				Status: "Unauthorized",
 			})

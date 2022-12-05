@@ -15,8 +15,8 @@ import (
 type User struct {
 	ID            uint      `gorm:"primaryKey"`
 	Username      string    `json:"name"`
-	Password      string    `json:"password"`
 	Email         string    `json:"email"`
+	Password      string    `json:"password"`
 }
 
 type Plan struct {
@@ -42,6 +42,7 @@ func InitDatabase() {
 	Database, err = gorm.Open(mysql.Open("root:@/goplanner?parseTime=true"), &gorm.Config{})
 
 	if err != nil {
+		fmt.Println("Failed initializing database")
 		panic(err)
 	}
 
@@ -67,12 +68,9 @@ func CreateToken(id int64) (http.Cookie, error) {
 	rawToken := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 	token, err := rawToken.SignedString([]byte("secret")) // ! temporary !
 	if err != nil {
-		fmt.Println("CreateToken error 1")
 		return http.Cookie{}, err
 	}
 
-	
-	// res, err := Database.Exec("INSERT INTO `sessions`(`session`, `user_id`, `start`, `expire`) VALUES (?, ?, ?, ?)", token, id, now, expires)
 	session := Session{
 		Session: token,
 		UserId: uint(id),
@@ -82,13 +80,11 @@ func CreateToken(id int64) (http.Cookie, error) {
 	res := Database.Create(&session)
 	
 	if err != nil {
-		fmt.Printf("CreateToken error 2: %s", err)
 		return http.Cookie{}, err
 	}
 
 	affected := res.RowsAffected
 	if affected != 1 {
-		fmt.Println("CreateToken error 3")
 		return http.Cookie{}, err
 	}
 
@@ -106,7 +102,6 @@ func ValidateSession(token string) (int64, bool, error){
 	var sessions []Session
 	res := Database.Find(&sessions, "session = ?", token) // where session = token
 	if res.Error != nil {
-		fmt.Printf("ValidateSession error 1: %s\n", res.Error)
 		return 0, false, res.Error
 	}
 
@@ -117,7 +112,6 @@ func ValidateSession(token string) (int64, bool, error){
 			}
 		}
 	}
-	fmt.Printf("ValidateSession error 2: %s\n", res.Error)
 	return 0, false, nil
 }
 

@@ -1,14 +1,8 @@
 package goplanner
 
 import (
-	_ "database/sql"
 	"log"
 	"net/http"
-	_ "time"
-
-	_ "github.com/go-sql-driver/mysql"
-
-	_ "github.com/golang-jwt/jwt/v4"
 
 	"github.com/labstack/echo/v4"
 
@@ -23,7 +17,7 @@ func RegisterRequest(c echo.Context) error {
 	user.Username = c.FormValue("name")
 	user.Password = c.FormValue("password")
 	user.Email = c.FormValue("mail")
-	log.Printf("Register with name:%s, pwd:%s, mail:%s", user.Username, user.Password, user.Email)
+	log.Printf("Register with name:%s, mail:%s", user.Username, user.Email)
 
 
 	res := db.Database.Create(&user)
@@ -36,10 +30,8 @@ func RegisterRequest(c echo.Context) error {
 	if affected == 1 {
 		log.Printf("new user: %#v", user)
 		
-
 		cookie, err := db.CreateToken(int64(user.ID))
 		if err != nil {
-			log.Println("Error creating jwt token: ", err)
 			return c.String(http.StatusInternalServerError, "something went wrong")
 		}
 	

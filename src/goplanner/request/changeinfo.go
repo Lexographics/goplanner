@@ -1,14 +1,7 @@
 package goplanner
 
 import (
-	_ "database/sql"
-	"fmt"
 	"net/http"
-	_ "time"
-
-	_ "github.com/go-sql-driver/mysql"
-
-	_ "github.com/golang-jwt/jwt/v4"
 
 	"github.com/labstack/echo/v4"
 
@@ -25,7 +18,6 @@ func ChangeInfoRequest(c echo.Context) error {
 	}
 
 	if info != "username" && info != "email" && info != "password" {
-		fmt.Printf("ChangeInfoRequest error 0: No valid info : %s\n", info)
 		return c.JSON(http.StatusUnauthorized, State{
 			Status: "Error",
 		})
@@ -33,7 +25,6 @@ func ChangeInfoRequest(c echo.Context) error {
 
 	cookie, err := c.Cookie("sessionId")
 	if err != nil {
-		fmt.Printf("ChangeInfoRequest error 1: %s\n", err)
 		return c.JSON(http.StatusUnauthorized, State{
 			Status: "Error",
 		})
@@ -42,7 +33,6 @@ func ChangeInfoRequest(c echo.Context) error {
 
 	id, success, err := db.ValidateSession(cookie.Value)
 	if err != nil {
-		fmt.Printf("ChangeInfoRequest Error 2\n")
 		return c.JSON(http.StatusUnauthorized, State{
 			Status: "Unauthorized",
 		})
@@ -54,7 +44,6 @@ func ChangeInfoRequest(c echo.Context) error {
 		}
 		res := db.Database.Model(&user).Update(info, newUsername)
 		if res.Error != nil {
-			fmt.Printf("ChangeInfoRequest Error 3: %s\n", res.Error)
 			return c.JSON(http.StatusUnauthorized, State{
 				Status: "Unauthorized",
 			})

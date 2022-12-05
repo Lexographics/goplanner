@@ -1,17 +1,11 @@
 package goplanner
 
 import (
-	_ "database/sql"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
-	_ "time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
-
-	_ "github.com/golang-jwt/jwt/v4"
 
 	"github.com/labstack/echo/v4"
 
@@ -23,13 +17,11 @@ func HomeView(c echo.Context) error {
 
 	cookie, err := c.Cookie("sessionId")
 	if err != nil {
-		fmt.Printf("HomeView error 1: %s\n", err)
 		return RedirectToAuthView(c)
 	}
 
 	id, success, err := db.ValidateSession(cookie.Value)
 	if err != nil {
-		fmt.Printf("HomeView error 2: %s\n", err)
 		return RedirectToAuthView(c)
 	}
 
@@ -55,23 +47,18 @@ func HomeView(c echo.Context) error {
 		
 
 		if start == "" && end == "" {
-			fmt.Println("1")
 			res = db.Database.Find(&plans, "user_id = ?", id)
 		} else {
 			if start != "" && end == "" { // has start
-				fmt.Println("2")
 				res = db.Database.Find(&plans, "user_id = ? AND end > ?", id, startDate)
 			} else if start == "" && end != "" { // has end
-				fmt.Println("3")
 				res = db.Database.Find(&plans, "user_id = ? AND end < ?", id, endDate)
 			} else { // has both
-				fmt.Println("4")
 				res = db.Database.Find(&plans, "user_id = ? AND end > ? AND end < ?", id, startDate, endDate)
 			}
 		}
 
 		if res.Error != nil {
-			fmt.Printf("HomeView error 3: %s\n", res.Error)
 			return RedirectToAuthView(c)
 		}
 
@@ -84,8 +71,6 @@ func HomeView(c echo.Context) error {
 		return c.Render(http.StatusOK, "PlansPage", page)
 	}
 	
-
-	fmt.Printf("HomeView error 5: %s\n", err)
 	return RedirectToAuthView(c)
 }
 

@@ -1,16 +1,9 @@
 package goplanner
 
 import (
-	_ "database/sql"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
-	_ "time"
-
-	_ "github.com/go-sql-driver/mysql"
-
-	_ "github.com/golang-jwt/jwt/v4"
 
 	"github.com/labstack/echo/v4"
 
@@ -28,7 +21,6 @@ func NewPlanRequest(c echo.Context) error {
 
 	cookie, err := c.Cookie("sessionId")
 	if err != nil {
-		fmt.Printf("NewPlanRequest error 1: %s\n", err)
 		return c.JSON(http.StatusUnauthorized, State{
 			Status: "Error",
 		})
@@ -37,7 +29,6 @@ func NewPlanRequest(c echo.Context) error {
 
 	id, success, err := db.ValidateSession(cookie.Value)
 	if err != nil {
-		fmt.Printf("NewPlanRequest Error 2\n")
 		return c.JSON(http.StatusUnauthorized, State{
 			Status: "Unauthorized",
 		})
@@ -47,7 +38,6 @@ func NewPlanRequest(c echo.Context) error {
 		dateInt, err := strconv.Atoi(expire)
 		date := time.Unix(int64(dateInt), 0)
 		if err != nil {
-			fmt.Printf("Invalid date value: %s\n", err)
 			return c.JSON(http.StatusUnauthorized, State{
 				Status: "Error",
 			})
@@ -60,7 +50,6 @@ func NewPlanRequest(c echo.Context) error {
 		}
 		res := db.Database.Create(&plan)
 		if res.Error != nil {
-			fmt.Printf("NewPlanRequest Error 3: %s\n", res.Error)
 			return c.JSON(http.StatusUnauthorized, State{
 				Status: "Unauthorized",
 			})

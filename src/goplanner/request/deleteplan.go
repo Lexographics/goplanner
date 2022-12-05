@@ -1,14 +1,7 @@
 package goplanner
 
 import (
-	_ "database/sql"
-	"fmt"
 	"net/http"
-	_ "time"
-
-	_ "github.com/go-sql-driver/mysql"
-
-	_ "github.com/golang-jwt/jwt/v4"
 
 	"github.com/labstack/echo/v4"
 
@@ -25,7 +18,6 @@ func DeletePlanRequest(c echo.Context) error {
 
 	cookie, err := c.Cookie("sessionId")
 	if err != nil {
-		fmt.Printf("DeletePlanRequest error 1: %s\n", err)
 		return c.JSON(http.StatusUnauthorized, State{
 			Status: "Error",
 		})
@@ -34,7 +26,6 @@ func DeletePlanRequest(c echo.Context) error {
 
 	id, success, err := db.ValidateSession(cookie.Value)
 	if err != nil {
-		fmt.Printf("DeletePlanRequest Error 2\n")
 		return c.JSON(http.StatusUnauthorized, State{
 			Status: "Unauthorized",
 		})
@@ -44,7 +35,6 @@ func DeletePlanRequest(c echo.Context) error {
 		var plan db.Plan
 		res := db.Database.Find(&plan, "id = ? AND user_id = ?", planid, id).Delete(&plan)
 		if res.Error != nil {
-			fmt.Printf("DeletePlanRequest Error 3: %s\n", res.Error)
 			return c.JSON(http.StatusUnauthorized, State{
 				Status: "Unauthorized",
 			})

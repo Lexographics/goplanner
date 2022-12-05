@@ -5,13 +5,6 @@ import (
 	"net/http"
 	"text/template"
 
-	_ "database/sql"
-	_ "time"
-
-	_ "github.com/go-sql-driver/mysql"
-
-	_ "github.com/golang-jwt/jwt/v4"
-
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
