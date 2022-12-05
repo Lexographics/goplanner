@@ -1,0 +1,100 @@
+{{ define "ProfilePage" }}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="/fontawesome-free-6.2.1-web/css/fontawesome.css" rel="stylesheet">
+    <link href="/fontawesome-free-6.2.1-web/css/brands.css" rel="stylesheet">
+    <link href="/fontawesome-free-6.2.1-web/css/solid.css" rel="stylesheet">
+    <link href="/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="/style.css">
+
+    <title> Profile </title>
+</head>
+<body>
+    <nav id="nav">
+        <div id="navbar">
+            <input type="checkbox" id="toggle">
+            <i class="fa-solid fa-bars"></i>
+
+            <ul id="menu">
+                <li> <a href="/" class="navbar-btn"> Home </a> </li>
+                <li> <a href="/profile" class="navbar-btn"> Profile </a> </li>
+                <li> <a href="/logout" class="navbar-btn"> Log out </a> </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="sticky-separator"></div>
+
+
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        <h2 id="login-text" style="text-align: center;"> Profile of {{ .Username }} </h2>
+
+        <i style="font-size: 4rem; border: 4px solid #292929; background-color: white; padding: 2rem; margin: 2rem; border-radius: 50%; color: #4d4d4d;" class="fa-solid fa-user"></i>
+        <div style="width: 70%;">
+            <p> <i onclick="changeUsername()" class="icon-btn fa-solid fa-pen"></i> Username: {{ .Username }}</p>
+    
+            <div class="form-item-pad"></div>
+            <p> <i onclick="changeEmail()" class="icon-btn fa-solid fa-pen"></i> Email: {{ .Email }} </p>
+
+            <div class="form-item-pad"></div>
+            <p> <i onclick="changePassword()" class="icon-btn fa-solid fa-pen"></i> Password: '***' </p>
+        </div>
+    </div>
+
+    
+    <script>
+        function changeInfo(info, value) {
+            let query = `/changeinfo?info=${info}&username=${value}`
+            fetch(query, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                },
+            })
+            .then(response => response.text())
+            .then(text => { console.log(text); location.reload() })
+        }
+        function changeUsername() {
+            let newUsername = prompt('Enter your new email')
+            if (newUsername === "" || newUsername == undefined || newUsername == null) { return }
+
+            if(confirm(`Your username will be changed to '${newUsername}'. Are you sure?`)) {
+                changeInfo('username', newUsername)
+            }
+        }
+
+        function changePassword() {
+            let pass1 = prompt('Enter your new password')
+            if (pass1 === "" || pass1 == undefined || pass1 == null) { return }
+            let pass2 = prompt('Repeat new password')
+            if (pass1 === "" || pass1 == undefined || pass1 == null) { return }
+
+            if (pass1 === pass2) {
+                if(confirm(`Your password will be changed. Are you sure?`)) {
+                    changeInfo('password', pass1)
+                }
+            } else {
+                alert("Passwords don't match")
+            }
+        }
+
+        function changeEmail() {
+            let newEmail = prompt('Enter your new username')
+            if (newEmail === "" || newEmail == undefined || newEmail == null) { return }
+
+            if(confirm(`Your email will be changed to '${newEmail}'. Are you sure?`)) {
+                changeInfo('email', newEmail)
+            }
+        }
+    </script>
+</body>
+</html>
+
+{{ end }}

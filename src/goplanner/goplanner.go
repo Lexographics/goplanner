@@ -63,10 +63,12 @@ func Init()  {
 	authGroup.GET("/", views.HomeView)
 
 	e.GET("/", views.HomeView)
+	e.GET("/profile", views.ProfileView)
 	e.GET("/auth", views.AuthView)
 	
 	e.POST("/login", request.LoginRequest)
 	e.POST("/register", request.RegisterRequest)
+	e.GET("/changeinfo", request.ChangeInfoRequest)
 	e.GET("/logout", request.LogoutRequest)
 	e.GET("/newplan", request.NewPlanRequest)
 	e.GET("/deleteplan", request.DeletePlanRequest)
