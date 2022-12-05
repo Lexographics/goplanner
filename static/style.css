@@ -390,3 +390,36 @@ header:after {
 .icon-btn:hover {
     cursor: pointer;
 }
+
+.collapsible {
+    background-color: #777;
+    color: white;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    border-radius: 1rem;
+}
+
+.collapsible.active {
+    border-radius: 1rem 1rem 0 0;
+}
+  
+.active, .collapsible:hover {
+    background-color: #555;
+}
+
+.collapse-content {
+    padding: 1rem 2rem;
+    display: none;
+    overflow: hidden;
+    background-color: #f1f1f1;
+
+    border-radius: 0 0 1rem 1rem;
+}
+.collapse-content > * {
+    margin: 2px;
+}

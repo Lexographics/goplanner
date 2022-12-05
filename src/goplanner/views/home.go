@@ -4,9 +4,12 @@ import (
 	_ "database/sql"
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 	_ "time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/gorm"
 
 	_ "github.com/golang-jwt/jwt/v4"
 
@@ -32,7 +35,41 @@ func HomeView(c echo.Context) error {
 
 	if success {
 		var plans []db.Plan
-		res := db.Database.Find(&plans, "user_id = ?", id)
+		var res *gorm.DB
+
+		start := c.QueryParam("start")
+		end := c.QueryParam("end")
+
+		startDate := time.Now()
+		endDate := time.Now()
+
+		startInt, err := strconv.Atoi(start)
+		if err == nil {
+			startDate = time.Unix(int64(startInt), 0)
+		}
+
+		endInt, err := strconv.Atoi(end)
+		if err == nil {
+			endDate = time.Unix(int64(endInt), 0)
+		}
+		
+
+		if start == "" && end == "" {
+			fmt.Println("1")
+			res = db.Database.Find(&plans, "user_id = ?", id)
+		} else {
+			if start != "" && end == "" { // has start
+				fmt.Println("2")
+				res = db.Database.Find(&plans, "user_id = ? AND end > ?", id, startDate)
+			} else if start == "" && end != "" { // has end
+				fmt.Println("3")
+				res = db.Database.Find(&plans, "user_id = ? AND end < ?", id, endDate)
+			} else { // has both
+				fmt.Println("4")
+				res = db.Database.Find(&plans, "user_id = ? AND end > ? AND end < ?", id, startDate, endDate)
+			}
+		}
+
 		if res.Error != nil {
 			fmt.Printf("HomeView error 3: %s\n", res.Error)
 			return RedirectToAuthView(c)

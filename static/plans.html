@@ -43,8 +43,33 @@
         </div>
     </header>
 
+    <div style="display: flex; align-items: center; flex-direction: column;">
+        <div style="width: 90%;">
+            <div class="collapsible" style="display: flex; justify-content: space-between; user-select: none;">
+                <span>
+                    Filter Plans
+                </span>
+
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+
+            <div class="collapse-content">
+                <label> Start </label>
+                <input type="date" id="start-date">
+    
+                <br>
+    
+                <label> End </label>
+                <input type="date" id="end-date">
+    
+                <br>
+    
+                <button onclick="applyFilter()" style="padding: 8px 16px; margin-top: 0.5rem;"> Apply filter </button>
+            </div>
+        </div>
+    </div>
+
     <ul id="plans">
-        
         
         {{ range $val := .Plans }}
         <li class="{{ $val.State }}" data-planid="{{ $val.Id }}">
@@ -92,6 +117,43 @@
     </footer>
 
 
+    <script>
+        function applyFilter() {
+            const startDate_el = document.getElementById("start-date")
+            const endDate_el = document.getElementById("end-date")
+
+            let startDateUnix = (+new Date(startDate_el.value)/1000).toFixed(0)
+            let endDateUnix = (+new Date(endDate_el.value)/1000).toFixed(0)
+
+            let query = '/?'
+            if (startDateUnix !== 'NaN') {
+                query += `start=${startDateUnix}`
+            }
+            if (endDateUnix !== 'NaN') {
+                if (query !== '/?') { query += '&' }
+                query += `end=${endDateUnix}`
+            }
+            
+            window.location.href = query
+        }
+    </script>
+    <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+        
+        for (i = 0; i < coll.length; i++) {
+          coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {
+              content.style.display = "none";
+            } else {
+              content.style.display = "block";
+            }
+          });
+        }
+    </script>
+    
     <script>
         function AddPlan() {
             const text_el = document.getElementById('plan-input')
