@@ -23,7 +23,7 @@
             <i class="fa-solid fa-bars"></i>
 
             <ul id="menu">
-                <li> <a href="/home/" class="navbar-btn"> Home </a> </li>
+                <li> <a href="/" class="navbar-btn"> Home </a> </li>
                 <li> <a href="/logout" class="navbar-btn"> Log out </a> </li>
             </ul>
         </div>
@@ -58,18 +58,36 @@
         <div class="fab fab-bottom-left-1 fab-red fab-ctx disabled fab-delete">
             <i class="fa-solid fa-xmark"></i>
         </div>
+
+        <!-- mark as -->
         <div class="fab fab-bottom-left-2 fab-green fab-ctx disabled fab-mark-done">
+            <i class="fa-solid fa-chevron-right"></i>
+        </div>
+
+        <!-- done -->
+        <div class="fab fab-text fab-bottom-1-left-2 fab-green fab-ctx-state state-disabled fab-state-done">
             <i class="fa-solid fa-check"></i>
         </div>
+
+        <!-- cancel -->
+        <div class="fab fab-text fab-bottom-2-left-2 fab-green fab-ctx-state state-disabled fab-state-cancel">
+            <i class="fa-solid fa-ban"></i>
+        </div>
+
+        <!-- in progress -->
+        <div class="fab fab-text fab-bottom-3-left-2 fab-green fab-ctx-state state-disabled fab-state-inprogress">
+            <i class="fa-solid fa-spinner"></i>
+        </div>
         
+
         <div class="fab fab-bottom-left-3 fab-blue fab-ctx disabled fab-edit">
             <i class="fa-solid fa-pen-to-square"></i>
         </div>
 
 
-        <div class="fab fab-bottom-right">
+        <!-- <div class="fab fab-bottom-right">
             <i class="fa-solid fa-floppy-disk"></i>
-        </div>
+        </div> -->
     </footer>
 
 
@@ -102,6 +120,40 @@
     <script>
         var ul = document.querySelector("#plans")
         let selectedIndex = -1
+
+        function mark_as_state(state) {
+            if (selectedIndex === -1) { return }
+
+            let li = ul.children[selectedIndex]
+            let id = li.dataset.planid
+
+            if(confirm(`Mark as ${state}?`)) {
+                let query = `/setplanstate?id=${id}&state=${state}`
+                fetch(query, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                })
+                .then(response => response.text())
+                .then(text => { console.log(text); location.reload() })
+            }
+        }
+
+        const state_fab_done = document.querySelector(".fab-state-done")
+        const state_fab_cancel = document.querySelector(".fab-state-cancel")
+        const state_fab_inprogress = document.querySelector(".fab-state-inprogress")
+
+        state_fab_done.addEventListener('click', function(e) {
+            mark_as_state('done')
+        })
+        state_fab_cancel.addEventListener('click', function(e) {
+            mark_as_state('cancel')
+        })
+        state_fab_inprogress.addEventListener('click', function(e) {
+            mark_as_state('inprogress')
+        })
+        
         
         const fab_edit = document.querySelector(".fab-edit")
         const fab_done = document.querySelector(".fab-mark-done")
@@ -129,7 +181,11 @@
         })
 
         fab_done.addEventListener('click', function(e) {
-            alert('mark as done ' + selectedIndex)
+
+            let fabs = document.getElementsByClassName("fab-ctx-state")
+            for(fab of fabs) {
+                fab.classList.toggle('state-disabled')
+            }
         })
 
         fab_delete.addEventListener('click', function(e) {
@@ -162,10 +218,15 @@
 
                 let index = Array.from(e.target.parentElement.children).indexOf(e.target)
                 let fabs = document.getElementsByClassName("fab-ctx")
+                let state_fabs = document.getElementsByClassName("fab-ctx-state")
 
                 if (index === selectedIndex) { // toggled
                     for (fab of fabs) {
                         fab.classList.add("disabled")
+                    }
+                    for (fab of state_fabs) {
+                        fab.classList.add("disabled")
+                        fab.classList.add("state-disabled")
                     }
                     selectedIndex = -1
                     e.target.classList.remove('done')
@@ -173,12 +234,11 @@
                     for (fab of fabs) {
                         fab.classList.remove("disabled")
                     }
+                    for (fab of state_fabs) {
+                        fab.classList.remove("disabled")
+                    }
                     selectedIndex = index
                 }
-                
-                
-
-                
             }
         }, false)
     </script>

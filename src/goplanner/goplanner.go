@@ -72,6 +72,7 @@ func Init()  {
 	e.GET("/newplan", request.NewPlanRequest)
 	e.GET("/deleteplan", request.DeletePlanRequest)
 	e.GET("/renameplan", request.RenamePlanRequest)
+	e.GET("/setplanstate", request.SetPlanStateRequest)
 
 
 	e.Logger.Fatal(e.Start(":8000"))

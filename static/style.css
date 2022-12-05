@@ -264,6 +264,11 @@ header:after {
     justify-content: center;
     align-items: center;
     transition: 0.4s;
+    z-index: 1;
+}
+
+.fab-text {
+    border-radius: 1rem;
 }
 
 .fab-bottom-right {
@@ -284,8 +289,31 @@ header:after {
     bottom: 10rem;
 }
 
+.fab-bottom-1-left-2 {
+    left: 5rem;
+    bottom: 5rem;
+}
+.fab-bottom-2-left-2 {
+    left: 10rem;
+    bottom: 5rem;
+}
+.fab-bottom-3-left-2 {
+    left: 15rem;
+    bottom: 5rem;
+}
+
+
 .fab.disabled {
     bottom: -5rem;
+}
+
+.fab-ctx-state {
+    scale: 100%;
+    z-index: 0;
+}
+.fab.state-disabled {
+    scale: 0;
+    left: 0rem;
 }
 
 .fab:hover {

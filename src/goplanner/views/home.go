@@ -33,20 +33,22 @@ func HomeView(c echo.Context) error {
 	}
 
 	if success {
-		res, err := db.Database.Query("SELECT `id`, `user_id`, `plan`, `start`, `end` from `plans` WHERE `user_id` = ?", id)
+		res, err := db.Database.Query("SELECT `id`, `user_id`, `plan`, 'state', `end` from `plans` WHERE `user_id` = ?", id)
 		defer res.Close()
 		if err != nil {
-			panic(err)
+			fmt.Printf("HomeView error 3: %s\n", err)
+			return RedirectToAuthView(c)
 		}
 		
 		plans := []db.Plan{}
 
 		for res.Next() {
 			var plan db.Plan
-			err := res.Scan(&plan.Id, &plan.UserID, &plan.Plan, &plan.Start, &plan.End)
+			err := res.Scan(&plan.Id, &plan.UserID, &plan.Plan, &plan.State, &plan.End)
 
 			if err != nil {
-				panic(err)
+				fmt.Printf("HomeView error 4: %s\n", err)
+				return RedirectToAuthView(c)
 			}
 			
 			plans = append(plans, plan)
@@ -62,7 +64,7 @@ func HomeView(c echo.Context) error {
 	}
 	
 
-	fmt.Printf("HomeView error 3: %s\n", err)
+	fmt.Printf("HomeView error 5: %s\n", err)
 	return RedirectToAuthView(c)
 }
 

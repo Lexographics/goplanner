@@ -25,7 +25,7 @@ type Plan struct {
 	Id     int
 	UserID int
 	Plan   string
-	Start  time.Time
+	State  string
 	End    time.Time
 }
 
