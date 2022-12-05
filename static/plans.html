@@ -73,7 +73,7 @@
         
         {{ range $val := .Plans }}
         <li class="{{ $val.State }}" data-planid="{{ $val.Id }}">
-            <span> {{ $val.Plan }} </span>
+            <span> &lt;{{ $val.End.Format "2006 Jan 02 - 15:04" }}&gt; - {{ $val.Plan }} </span>
         </li>
         {{ end }}
 
