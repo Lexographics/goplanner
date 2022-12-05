@@ -11,6 +11,7 @@ import (
 	_ "github.com/golang-jwt/jwt/v4"
 
 	"github.com/labstack/echo/v4"
+	_ "gorm.io/gorm"
 
 	db "github.com/Lexographics/goplanner/src/goplanner/db"
 )
@@ -42,10 +43,19 @@ func SetPlanStateRequest(c echo.Context) error {
 	}
 
 	if success {
+		var plan db.Plan
+		res := db.Database.Find(&plan, "id = ? AND user_id = ?", planid, id)
+		if res.Error != nil {
+			fmt.Printf("SetPlanStateRequest Error 3: %s\n", res.Error)
+			return c.JSON(http.StatusUnauthorized, State{
+				Status: "Unauthorized",
+			})
+		}
+		plan.State = state
 
-		_, err = db.Database.Exec("UPDATE `plans` SET `state`=? WHERE id=? AND user_id=?", state, planid, id)
-		if err != nil {
-			fmt.Printf("SetPlanStateRequest Error 3: %s\n", err)
+		res = db.Database.Save(&plan)
+		if res.Error != nil {
+			fmt.Printf("SetPlanStateRequest Error 4: %s\n", res.Error)
 			return c.JSON(http.StatusUnauthorized, State{
 				Status: "Unauthorized",
 			})

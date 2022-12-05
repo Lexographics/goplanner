@@ -4,6 +4,7 @@ import (
 	_ "database/sql"
 	"fmt"
 	"net/http"
+	"strconv"
 	_ "time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -42,10 +43,21 @@ func RenamePlanRequest(c echo.Context) error {
 	}
 
 	if success {
-
-		_, err = db.Database.Exec("UPDATE `plans` SET `plan`=? WHERE id=? AND user_id=?", newText, planid, id)
+		planidInt, err := strconv.Atoi(planid)
 		if err != nil {
-			fmt.Printf("RenamePlanRequest Error 3: %s\n", err)
+			fmt.Printf("RenamePlanRequest Error 3\n")
+			return c.JSON(http.StatusUnauthorized, State{
+				Status: "Unauthorized",
+			})
+		}
+
+		plan := db.Plan{
+			Id: planidInt,
+			UserID: int(id),
+		}
+		res := db.Database.Model(&plan).Update("plan", newText)
+		if res.Error != nil {
+			fmt.Printf("RenamePlanRequest Error 4: %s\n", res.Error)
 			return c.JSON(http.StatusUnauthorized, State{
 				Status: "Unauthorized",
 			})

@@ -20,28 +20,24 @@ import (
 func RegisterRequest(c echo.Context) error {
 	user := db.User{}
 	
-	user.Name = c.FormValue("name")
+	user.Username = c.FormValue("name")
 	user.Password = c.FormValue("password")
 	user.Email = c.FormValue("mail")
+	log.Printf("Register with name:%s, pwd:%s, mail:%s", user.Username, user.Password, user.Email)
 
-	log.Printf("Register with name:%s, pwd:%s, mail:%s", user.Name, user.Password, user.Email)
 
-	res, err := db.Database.Exec("INSERT INTO `users`(`username`, `email`, `password`) VALUES (?, ?, ?)", user.Name, user.Email, user.Password)
-	if err != nil {
-		log.Printf("Error creating user " + err.Error())
+	res := db.Database.Create(&user)
+	if res.Error != nil {
+		log.Printf("Error creating user " + res.Error.Error())
 		return views.RedirectToHomeView(c)
 	}
 
-	affected, err := res.RowsAffected()
+	affected := res.RowsAffected
 	if affected == 1 {
 		log.Printf("new user: %#v", user)
-		id, err := res.LastInsertId()
-		if err != nil {
-			log.Println("Error LastInsertId: ", err)
-			return c.String(http.StatusInternalServerError, "something went wrong")
-		}
+		
 
-		cookie, err := db.CreateToken(id)
+		cookie, err := db.CreateToken(int64(user.ID))
 		if err != nil {
 			log.Println("Error creating jwt token: ", err)
 			return c.String(http.StatusInternalServerError, "something went wrong")

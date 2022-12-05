@@ -32,7 +32,6 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 
 func Init()  {
 	db.InitDatabase()
-	defer db.Database.Close()
 	
 	// Echo
 	e := echo.New()

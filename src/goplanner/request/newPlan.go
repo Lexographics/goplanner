@@ -53,9 +53,14 @@ func NewPlanRequest(c echo.Context) error {
 			})
 		}
 
-		_, err = db.Database.Exec("INSERT INTO `plans`(`user_id`, `plan`, `end`) VALUES (?, ?, ?)", id, text, date)
-		if err != nil {
-			fmt.Printf("NewPlanRequest Error 3: %s\n", err)
+		plan := db.Plan{
+			UserID: int(id),
+			Plan: text,
+			End: date,
+		}
+		res := db.Database.Create(&plan)
+		if res.Error != nil {
+			fmt.Printf("NewPlanRequest Error 3: %s\n", res.Error)
 			return c.JSON(http.StatusUnauthorized, State{
 				Status: "Unauthorized",
 			})

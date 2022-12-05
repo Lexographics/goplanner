@@ -41,10 +41,10 @@ func DeletePlanRequest(c echo.Context) error {
 	}
 
 	if success {
-
-		_, err = db.Database.Exec("DELETE FROM `plans` WHERE id=? AND user_id=?", planid, id)
-		if err != nil {
-			fmt.Printf("DeletePlanRequest Error 3: %s\n", err)
+		var plan db.Plan
+		res := db.Database.Find(&plan, "id = ? AND user_id = ?", planid, id).Delete(&plan)
+		if res.Error != nil {
+			fmt.Printf("DeletePlanRequest Error 3: %s\n", res.Error)
 			return c.JSON(http.StatusUnauthorized, State{
 				Status: "Unauthorized",
 			})

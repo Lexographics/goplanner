@@ -1,24 +1,22 @@
 package goplanner
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 
 	"github.com/golang-jwt/jwt"
 )
 
 
 type User struct {
-	Name      string    `json:"name"`
-	Password  string    `json:"password"`
-	Email     string    `json:"email"`
-}
-
-type JwtClaims struct {
-	Name     string  `json:"name"`
-	jwt.StandardClaims
+	ID            uint      `gorm:"primaryKey"`
+	Username      string    `json:"name"`
+	Password      string    `json:"password"`
+	Email         string    `json:"email"`
 }
 
 type Plan struct {
@@ -29,19 +27,32 @@ type Plan struct {
 	End    time.Time
 }
 
-var Database *sql.DB
+type Session struct {
+	Session string   `gorm:"primaryKey"`
+	UserId  uint
+	Start   time.Time
+	Expire  time.Time
+}
+
+var Database *gorm.DB
 
 func InitDatabase() {
 	var err error
-	Database, err = sql.Open("mysql", "root:@/goplanner?parseTime=true")
+
+	Database, err = gorm.Open(mysql.Open("root:@/goplanner?parseTime=true"), &gorm.Config{})
 
 	if err != nil {
 		panic(err)
 	}
 
-	Database.SetConnMaxLifetime(time.Minute * 3)
-	Database.SetMaxOpenConns(10)
-	Database.SetMaxIdleConns(10)
+	sqldb, err := Database.DB()
+	sqldb.SetConnMaxLifetime(time.Minute * 3)
+	sqldb.SetMaxOpenConns(10)
+	sqldb.SetMaxIdleConns(10)
+
+	Database.AutoMigrate(&Session{})
+	Database.AutoMigrate(&Plan{})
+	Database.AutoMigrate(&User{})
 }
 
 func CreateToken(id int64) (http.Cookie, error) {
@@ -60,14 +71,23 @@ func CreateToken(id int64) (http.Cookie, error) {
 		return http.Cookie{}, err
 	}
 
-	res, err := Database.Exec("INSERT INTO `sessions`(`session`, `user_id`, `start`, `expire`) VALUES (?, ?, ?, ?)", token, id, now, expires)
+	
+	// res, err := Database.Exec("INSERT INTO `sessions`(`session`, `user_id`, `start`, `expire`) VALUES (?, ?, ?, ?)", token, id, now, expires)
+	session := Session{
+		Session: token,
+		UserId: uint(id),
+		Start: now,
+		Expire: expires,
+	}
+	res := Database.Create(&session)
+	
 	if err != nil {
 		fmt.Printf("CreateToken error 2: %s", err)
 		return http.Cookie{}, err
 	}
 
-	_, err = res.RowsAffected()
-	if err != nil {
+	affected := res.RowsAffected
+	if affected != 1 {
 		fmt.Println("CreateToken error 3")
 		return http.Cookie{}, err
 	}
@@ -83,37 +103,31 @@ func CreateToken(id int64) (http.Cookie, error) {
 
 // Returns true if a session is valid
 func ValidateSession(token string) (int64, bool, error){
-	res, err := Database.Query("SELECT `user_id`, `start`, `expire` FROM `sessions` WHERE session=?", token)
-	if err != nil {
-		fmt.Printf("ValidateSession error 1: %s\n", err)
-		return 0, false, err
+	var sessions []Session
+	res := Database.Find(&sessions, "session = ?", token) // where session = token
+	if res.Error != nil {
+		fmt.Printf("ValidateSession error 1: %s\n", res.Error)
+		return 0, false, res.Error
 	}
 
-	var id int64
-	var start time.Time
-	var expire time.Time
-	for res.Next() {
-		res := res.Scan(&id, &start, &expire)
-		if res != nil {
-			fmt.Printf("ValidateSession error 2: %s\n", err)
-			return 0, false, err
+	for _, session := range sessions {
+		if session.Session == token {
+			if time.Now().Unix() > session.Start.Unix() && time.Now().Unix() < session.Expire.Unix() {
+				return int64(session.UserId), true, nil
+			}
 		}
-
-		if time.Now().Unix() > start.Unix() && time.Now().Unix() < expire.Unix() {
-			return id, true, nil
-		}
-
 	}
-	
+	fmt.Printf("ValidateSession error 2: %s\n", res.Error)
 	return 0, false, nil
 }
 
 
 // Invalidate given tokens session
 func InvalidateSession(token string) error {
-	_, err := Database.Exec("DELETE FROM `sessions` WHERE session=?", token)
-	if err != nil {
-		return err
+	var session Session
+	res := Database.Find(&session, "session = ?", token).Delete(&session)
+	if res.Error != nil {
+		return res.Error
 	}
 	return nil
 }

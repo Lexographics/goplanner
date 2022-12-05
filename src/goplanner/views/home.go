@@ -24,8 +24,6 @@ func HomeView(c echo.Context) error {
 		return RedirectToAuthView(c)
 	}
 
-	fmt.Printf("Cookie: %s", cookie.Value)
-
 	id, success, err := db.ValidateSession(cookie.Value)
 	if err != nil {
 		fmt.Printf("HomeView error 2: %s\n", err)
@@ -33,25 +31,11 @@ func HomeView(c echo.Context) error {
 	}
 
 	if success {
-		res, err := db.Database.Query("SELECT `id`, `user_id`, `plan`, 'state', `end` from `plans` WHERE `user_id` = ?", id)
-		defer res.Close()
-		if err != nil {
-			fmt.Printf("HomeView error 3: %s\n", err)
+		var plans []db.Plan
+		res := db.Database.Find(&plans, "user_id = ?", id)
+		if res.Error != nil {
+			fmt.Printf("HomeView error 3: %s\n", res.Error)
 			return RedirectToAuthView(c)
-		}
-		
-		plans := []db.Plan{}
-
-		for res.Next() {
-			var plan db.Plan
-			err := res.Scan(&plan.Id, &plan.UserID, &plan.Plan, &plan.State, &plan.End)
-
-			if err != nil {
-				fmt.Printf("HomeView error 4: %s\n", err)
-				return RedirectToAuthView(c)
-			}
-			
-			plans = append(plans, plan)
 		}
 
 		type Page struct {
