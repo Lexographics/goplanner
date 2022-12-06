@@ -2,7 +2,6 @@ package goplanner
 
 import (
 	"io"
-	"net/http"
 	"text/template"
 
 	"github.com/labstack/echo/v4"
@@ -25,6 +24,8 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 
 func Init()  {
 	db.InitDatabase()
+	sqldb, _ := db.Database.DB()
+	defer sqldb.Close()
 	
 	// Echo
 	e := echo.New()
@@ -39,23 +40,10 @@ func Init()  {
 	}))
 	e.Use(middleware.Recover())
 	e.Static("/", "./static")
-	
-	authGroup := e.Group("/home")
-	jwtMiddleware := middleware.JWTWithConfig(
-		middleware.JWTConfig{
-			SigningMethod: "HS512",
-			SigningKey: []byte("secret"), // ! temporary !
-			TokenLookup: "cookie:sessionId",
-			ErrorHandlerWithContext: func(err error, c echo.Context) error {
-				return c.Redirect(http.StatusOK, "/auth")
-			},
-		},
-	)
-	authGroup.Use(jwtMiddleware)
 
-	authGroup.GET("/", views.HomeView)
 
 	e.GET("/", views.HomeView)
+	e.GET("/home", views.HomeView)
 	e.GET("/profile", views.ProfileView)
 	e.GET("/auth", views.AuthView)
 	

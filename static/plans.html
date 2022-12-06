@@ -23,7 +23,7 @@
             <i class="fa-solid fa-bars"></i>
 
             <ul id="menu">
-                <li> <a href="/" class="navbar-btn"> Home </a> </li>
+                <li> <a href="/home" class="navbar-btn"> Home </a> </li>
                 <li> <a href="/profile" class="navbar-btn"> Profile </a> </li>
                 <li> <a href="/logout" class="navbar-btn"> Log out </a> </li>
             </ul>
@@ -232,7 +232,7 @@
             let li = ul.children[selectedIndex]
             let id = li.dataset.planid
             
-            let newText = prompt("Enter new text", li.children[0].textContent)
+            let newText = prompt("Enter new text")
             if (newText === "" || newText == undefined || newText == null) { return }
 
             let query = `/renameplan?id=${id}&newtext=${newText}`
